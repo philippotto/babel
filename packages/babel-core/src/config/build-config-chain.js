@@ -48,7 +48,9 @@ class ConfigChainBuilder {
 
     if (ignore) {
       if (!Array.isArray(ignore)) {
-        throw new Error(`.ignore should be an array, was ${JSON.stringify(ignore)}`);
+        throw new Error(
+          `.ignore should be an array, was ${JSON.stringify(ignore)}`,
+        );
       }
 
       for (const pattern of ignore) {
@@ -58,7 +60,9 @@ class ConfigChainBuilder {
 
     if (only) {
       if (!Array.isArray(only)) {
-        throw new Error(`.only should be an array, was ${JSON.stringify(only)}`);
+        throw new Error(
+          `.only should be an array, was ${JSON.stringify(only)}`,
+        );
       }
 
       for (const pattern of only) {
@@ -94,10 +98,12 @@ class ConfigChainBuilder {
         }
       }
 
-      return this.possibleDirs.some(micromatch.filter(path.resolve(dirname, pattern), {
-        nocase: true,
-        nonegate: true,
-      }));
+      return this.possibleDirs.some(
+        micromatch.filter(path.resolve(dirname, pattern), {
+          nocase: true,
+          nonegate: true,
+        }),
+      );
     } else if (typeof pattern === "function") {
       return pattern(this.filename);
     } else {
@@ -122,21 +128,27 @@ class ConfigChainBuilder {
     });
   }
 
-  mergeConfig({
-    type,
-    options,
-    alias,
-    loc,
-    dirname,
-  }) {
+  mergeConfig(
+    {
+      type,
+      options,
+      alias,
+      loc,
+      dirname,
+    },
+  ) {
     if (!options) {
       return false;
     }
 
     // Bail out ASAP if this file is ignored so that we run as little logic as possible on ignored files.
-    if (this.filename && this.shouldIgnore(options.ignore, options.only, dirname)) {
+    if (
+      this.filename && this.shouldIgnore(options.ignore, options.only, dirname)
+    ) {
       // TODO(logan): This is a really cross way to bail out. Avoid this in rewrite.
-      throw Object.assign(new Error("This file has been ignored."), { code: "BABEL_IGNORED_FILE" });
+      throw Object.assign(new Error("This file has been ignored."), {
+        code: "BABEL_IGNORED_FILE",
+      });
     }
 
     options = Object.assign({}, options);
@@ -169,7 +181,7 @@ class ConfigChainBuilder {
     if (options.extends) {
       const extendsConfig = loadConfig(options.extends, dirname);
 
-      const existingConfig = this.configs.some((config) => {
+      const existingConfig = this.configs.some(config => {
         return config.alias === extendsConfig.filepath;
       });
       if (!existingConfig) {
@@ -184,4 +196,3 @@ class ConfigChainBuilder {
     }
   }
 }
-

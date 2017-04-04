@@ -22,7 +22,7 @@ const BABELIGNORE_FILENAME = ".babelignore";
 function exists(filename) {
   const cached = existsCache[filename];
   if (cached == null) {
-    return existsCache[filename] = fs.existsSync(filename);
+    return (existsCache[filename] = fs.existsSync(filename));
   } else {
     return cached;
   }
@@ -51,17 +51,22 @@ export function findConfigs(dirname: string): Array<ConfigFile> {
         BABELRC_FILENAME,
         BABELRC_JS_FILENAME,
         PACKAGE_FILENAME,
-      ].reduce((previousConfig: ConfigFile|null, name) => {
-        const filepath = path.join(loc, name);
-        const config = readConfig(filepath);
+      ].reduce(
+        (previousConfig: ConfigFile | null, name) => {
+          const filepath = path.join(loc, name);
+          const config = readConfig(filepath);
 
-        if (config && previousConfig) {
-          throw new Error(`Multiple configuration files found. Please remove one:\n- ${
-            path.basename(previousConfig.filepath)}\n- ${name}\nfrom ${loc}`);
-        }
+          if (config && previousConfig) {
+            throw new Error(
+              // eslint-disable-next-line max-len
+              `Multiple configuration files found. Please remove one:\n- ${path.basename(previousConfig.filepath)}\n- ${name}\nfrom ${loc}`,
+            );
+          }
 
-        return config || previousConfig;
-      }, null);
+          return config || previousConfig;
+        },
+        null,
+      );
 
       if (conf) {
         confs.push(conf);
@@ -83,7 +88,9 @@ export function loadConfig(name: string, dirname: string): ConfigFile {
   const filepath = resolve.sync(name, { basedir: dirname });
 
   const conf = readConfig(filepath);
-  if (!conf) throw new Error(`Config file ${filepath} contains no configuration data`);
+  if (!conf) {
+    throw new Error(`Config file ${filepath} contains no configuration data`);
+  }
 
   return conf;
 }
@@ -93,7 +100,9 @@ export function loadConfig(name: string, dirname: string): ConfigFile {
  * throw if there are parsing errors while loading a config.
  */
 function readConfig(filepath) {
-  return (path.extname(filepath) === ".js") ? readConfigJS(filepath) : readConfigFile(filepath);
+  return path.extname(filepath) === ".js"
+    ? readConfigJS(filepath)
+    : readConfigFile(filepath);
 }
 
 function readIgnoreConfig(filepath) {
@@ -103,8 +112,8 @@ function readIgnoreConfig(filepath) {
   let lines = file.split("\n");
 
   lines = lines
-    .map((line) => line.replace(/#(.*?)$/, "").trim())
-    .filter((line) => !!line);
+    .map(line => line.replace(/#(.*?)$/, "").trim())
+    .filter(line => !!line);
 
   return {
     filepath,
@@ -120,14 +129,18 @@ function readConfigJS(filepath) {
   try {
     // $FlowIssue
     const configModule = (require(filepath): mixed);
-    options = configModule && configModule.__esModule ? (configModule.default || undefined) : configModule;
+    options = configModule && configModule.__esModule
+      ? configModule.default || undefined
+      : configModule;
   } catch (err) {
     err.message = `${filepath}: Error while loading config - ${err.message}`;
     throw err;
   }
 
   if (!options || typeof options !== "object" || Array.isArray(options)) {
-    throw new Error(`${filepath}: Configuration should be an exported JavaScript object.`);
+    throw new Error(
+      `${filepath}: Configuration should be an exported JavaScript object.`,
+    );
   }
 
   return {
@@ -145,7 +158,8 @@ function readConfigFile(filepath) {
   let options;
   if (path.basename(filepath) === PACKAGE_FILENAME) {
     try {
-      const json = jsonCache[content] = jsonCache[content] || JSON.parse(content);
+      const json = (jsonCache[content] = jsonCache[content] ||
+        JSON.parse(content));
 
       options = json.babel;
     } catch (err) {
@@ -155,7 +169,8 @@ function readConfigFile(filepath) {
     if (!options) return null;
   } else {
     try {
-      options = jsonCache[content] = jsonCache[content] || json5.parse(content);
+      options = (jsonCache[content] = jsonCache[content] ||
+        json5.parse(content));
     } catch (err) {
       err.message = `${filepath}: Error while parsing config - ${err.message}`;
       throw err;
@@ -164,8 +179,12 @@ function readConfigFile(filepath) {
     if (!options) throw new Error(`${filepath}: No config detected`);
   }
 
-  if (typeof options !== "object") throw new Error(`${filepath}: Config returned typeof ${typeof options}`);
-  if (Array.isArray(options)) throw new Error(`${filepath}: Expected config object but found array`);
+  if (typeof options !== "object") {
+    throw new Error(`${filepath}: Config returned typeof ${typeof options}`);
+  }
+  if (Array.isArray(options)) {
+    throw new Error(`${filepath}: Expected config object but found array`);
+  }
 
   return {
     filepath,

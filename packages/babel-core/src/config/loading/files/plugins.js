@@ -6,13 +6,19 @@
 
 import resolve from "resolve";
 
-export function resolvePlugin(pluginName: string, dirname: string): string|null {
+export function resolvePlugin(
+  pluginName: string,
+  dirname: string,
+): string | null {
   const possibleNames = [`babel-plugin-${pluginName}`, pluginName];
 
   return resolveFromPossibleNames(possibleNames, dirname);
 }
 
-export function resolvePreset(presetName: string, dirname: string): string|null {
+export function resolvePreset(
+  presetName: string,
+  dirname: string,
+): string | null {
   const possibleNames = [`babel-preset-${presetName}`, presetName];
 
   // trying to resolve @organization shortcat
@@ -26,9 +32,14 @@ export function resolvePreset(presetName: string, dirname: string): string|null 
   return resolveFromPossibleNames(possibleNames, dirname);
 }
 
-export function loadPlugin(name: string, dirname: string): { filepath: string, plugin: mixed } {
+export function loadPlugin(
+  name: string,
+  dirname: string,
+): { filepath: string, plugin: mixed } {
   const filepath = resolvePlugin(name, dirname);
-  if (!filepath) throw new Error(`Plugin ${name} not found relative to ${dirname}`);
+  if (!filepath) {
+    throw new Error(`Plugin ${name} not found relative to ${dirname}`);
+  }
 
   return {
     filepath,
@@ -36,9 +47,14 @@ export function loadPlugin(name: string, dirname: string): { filepath: string, p
   };
 }
 
-export function loadPreset(name: string, dirname: string): { filepath: string, preset: mixed } {
+export function loadPreset(
+  name: string,
+  dirname: string,
+): { filepath: string, preset: mixed } {
   const filepath = resolvePreset(name, dirname);
-  if (!filepath) throw new Error(`Preset ${name} not found relative to ${dirname}`);
+  if (!filepath) {
+    throw new Error(`Preset ${name} not found relative to ${dirname}`);
+  }
 
   return {
     filepath,
@@ -46,17 +62,26 @@ export function loadPreset(name: string, dirname: string): { filepath: string, p
   };
 }
 
-export function loadParser(name: string, dirname: string): { filepath: string, parser: Function } {
+export function loadParser(
+  name: string,
+  dirname: string,
+): { filepath: string, parser: Function } {
   const filepath = resolveQuiet(name, dirname);
-  if (!filepath) throw new Error(`Parser ${name} not found relative to ${dirname}`);
+  if (!filepath) {
+    throw new Error(`Parser ${name} not found relative to ${dirname}`);
+  }
 
   const mod = requireModule(filepath);
 
   if (!mod) {
-    throw new Error(`Parser ${name} relative to ${dirname} does not export an object`);
+    throw new Error(
+      `Parser ${name} relative to ${dirname} does not export an object`,
+    );
   }
   if (typeof mod.parse !== "function") {
-    throw new Error(`Parser ${name} relative to ${dirname} does not export a .parse function`);
+    throw new Error(
+      `Parser ${name} relative to ${dirname} does not export a .parse function`,
+    );
   }
 
   return {
@@ -65,17 +90,26 @@ export function loadParser(name: string, dirname: string): { filepath: string, p
   };
 }
 
-export function loadGenerator(name: string, dirname: string): { filepath: string, generator: Function } {
+export function loadGenerator(
+  name: string,
+  dirname: string,
+): { filepath: string, generator: Function } {
   const filepath = resolveQuiet(name, dirname);
-  if (!filepath) throw new Error(`Generator ${name} not found relative to ${dirname}`);
+  if (!filepath) {
+    throw new Error(`Generator ${name} not found relative to ${dirname}`);
+  }
 
   const mod = requireModule(filepath);
 
   if (!mod) {
-    throw new Error(`Generator ${name} relative to ${dirname} does not export an object`);
+    throw new Error(
+      `Generator ${name} relative to ${dirname} does not export an object`,
+    );
   }
   if (typeof mod.print !== "function") {
-    throw new Error(`Generator ${name} relative to ${dirname} does not export a .print function`);
+    throw new Error(
+      `Generator ${name} relative to ${dirname} does not export a .print function`,
+    );
   }
 
   return {
@@ -84,7 +118,7 @@ export function loadGenerator(name: string, dirname: string): { filepath: string
   };
 }
 
-function resolveQuiet(name: string, dirname: string): string|null {
+function resolveQuiet(name: string, dirname: string): string | null {
   try {
     return resolve.sync(name, { basedir: dirname });
   } catch (e) {
@@ -97,7 +131,10 @@ function resolveQuiet(name: string, dirname: string): string|null {
   return null;
 }
 
-function resolveFromPossibleNames(possibleNames: Array<string>, dirname: string): string|null {
+function resolveFromPossibleNames(
+  possibleNames: Array<string>,
+  dirname: string,
+): string | null {
   for (const name of possibleNames) {
     const result = resolveQuiet(name, dirname);
     if (result !== null) return result;
