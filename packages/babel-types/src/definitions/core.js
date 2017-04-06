@@ -435,6 +435,26 @@ defineType("MemberExpression", {
   },
 });
 
+defineType("ConditionalMemberExpression", {
+  builder: ["object", "property", "computed"],
+  visitor: ["object", "property"],
+  aliases: ["Expression", "LVal"],
+  fields: {
+    object: {
+      validate: assertNodeType("Expression"),
+    },
+    property: {
+      validate(node, key, val) {
+        const expectedType = node.computed ? "Expression" : "Identifier";
+        assertNodeType(expectedType)(node, key, val);
+      },
+    },
+    computed: {
+      default: false,
+    },
+  },
+});
+
 defineType("NewExpression", {
   visitor: ["callee", "arguments"],
   aliases: ["Expression"],
